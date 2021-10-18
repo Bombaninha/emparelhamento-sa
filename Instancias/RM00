@@ -1,0 +1,11 @@
+# número de vértices
+6
+# listas de arestas com cores
+# vertice1 vertice2 cor
+1   2   1
+2   3   2
+2   4   3
+3   4   3
+3   6   3
+4   5   2
+5   6   3
