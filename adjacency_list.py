@@ -17,6 +17,9 @@ class Graph:
             text_to_be_printed += 'None'
             print(text_to_be_printed)
 
+'''
+Exemplo de uso:
+
 g = Graph(4)
 
 g.add_edge(1, 2)
@@ -25,3 +28,4 @@ g.add_edge(1, 4)
 g.add_edge(2, 3)
 
 g.show_list()
+'''

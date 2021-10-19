@@ -12,6 +12,9 @@ class Graph:
         for i in range(self.vertexes):
             print(self.graph[i])
 
+'''
+Exemplo de uso:
+
 g = Graph(4)
 
 g.add_edge(1, 2)
@@ -19,3 +22,4 @@ g.add_edge(3, 4)
 g.add_edge(2, 3)
 
 g.show_matrix()
+'''

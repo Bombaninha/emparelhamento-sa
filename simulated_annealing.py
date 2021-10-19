@@ -1,6 +1,9 @@
 import argparse
 import sys
 
+import adjacency_list
+import adjacency_matrix
+
 class Edge:
     def __init__(self, vertex_u: int, vertex_v: int, color: int) -> None:
         self.vertex_u = vertex_u
