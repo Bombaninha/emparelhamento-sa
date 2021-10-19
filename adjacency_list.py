@@ -1,14 +1,14 @@
 class Graph:
 
-    def __init__(self, vertexes):
+    def __init__(self, vertexes: int) -> None:
         self.vertexes = vertexes
         self.graph = [[] for i in range(self.vertexes)]
 
-    def add_edge(self, u, v):
+    def add_edge(self, u: int, v: int) -> None:
         self.graph[u - 1].append(v)
         self.graph[v - 1].append(u)
 
-    def show_list(self):
+    def show_list(self) -> None:
         for i in range(self.vertexes):
             print(f'{ i + 1}: ', end='  ')
             text_to_be_printed = ''
