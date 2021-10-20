@@ -362,8 +362,9 @@ def main(parser: argparse.ArgumentParser) -> None:
         file.readline() #ignoring next two lines
         file.readline()
         edge_list = list(map(append_line, [line.split() for line in file]))
-        print(greedy_initial_solution(edge_list))
-        # aqui gerar greedy
+        
+        #print(greedy_initial_solution(edge_list))
+        
         #solution = simulated_annealing(set(), edge_list, 1000, 0.001, 0.95)
         #print(f"Solução: {len(solution)}")
         #test_solution(solution)
