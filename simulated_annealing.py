@@ -335,7 +335,7 @@ def main(parser: argparse.ArgumentParser) -> None:
             graph[vertex_u] += [vertex_v]
             graph[vertex_v] += [vertex_u]
 
-            if(vertex_u in deggre_counter):
+            if vertex_u in deggre_counter:
                 deggre_counter[vertex_u] += 1
             else:
                 deggre_counter[vertex_u] = 1
