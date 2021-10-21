@@ -233,9 +233,10 @@ class Edge:
         self.vertex_u = vertex_u
         self.vertex_v = vertex_v
         self.color = color
+        self.deggre = 0
 
     def has_same_attribute(self, edge: Edge) -> bool:
-        return edge.vertex_u == self.vertex_u or edge.vertex_v == self.vertex_v or edge.color == self.color
+        return edge.color == self.color or (edge.vertex_u == self.vertex_u or edge.vertex_u == self.vertex_v or edge.vertex_v == self.vertex_v or edge.vertex_v == self.vertex_u)
 
     def __repr__(self) -> str:
         return f"({self.vertex_u},{self.vertex_v})[{self.color}][Gm(e) = {self.deggre}]"
@@ -293,16 +294,7 @@ def test_solution(sol: Set[Edge]) -> None:
             print("Something went wrong")
             print(f"{edge = } has at least on attribute in common with another edge.")
 
-def greedy_initial_solution(edges):
-    debug = False
-    # Inicializa um dicionário vazio com valor inicial 0
-    deggre_counter = Counter()
-    
-    # Para cada aresta, computa vezes em que os vértices aparecem
-    for edge in edges:
-        deggre_counter[edge.vertex_u] += 1
-        deggre_counter[edge.vertex_v] += 1
-
+def greedy_initial_solution(edges, deggre_counter):
     # Para cada aresta, calcula o grau médio e coloca na aresta
     for edge in edges:
         edge.deggre = (deggre_counter[edge.vertex_u] + deggre_counter[edge.vertex_v]) / 2
@@ -310,32 +302,13 @@ def greedy_initial_solution(edges):
     # Ordena as arestas, para buscar de maneira gulosa
     sorted_edges = sorted(edges, key=lambda x: x.deggre, reverse=False)
 
-    if(debug):
-        print(sorted_edges)
-
     edges = set()
     edges.add(sorted_edges.pop(0))
 
-    def can_add(edge, edges):
-        colors = set()
-        vertexes = set()
-
-        for e in edges:
-            colors.add(e.color)
-            vertexes.add(e.vertex_v)
-            vertexes.add(e.vertex_u)
-
-        return edge.color not in colors and (edge.vertex_u not in vertexes and edge.vertex_v not in vertexes)
-
-
     for edge in sorted_edges:
-        if(can_add(edge, edges)):
+        if not any(edge.has_same_attribute(e) for e in edges):
             edges.add(edge)
-            if(debug):
-                print(f"[OK] Aresta { edge } adicionada!")
-        else:
-            if(debug):
-                print(f"[ERROR] Aresta { edge } não pode ser adicionada!")
+            
 
     return edges
 
@@ -348,26 +321,35 @@ def main(parser: argparse.ArgumentParser) -> None:
         sys.exit()
 
     with open(options.filepath, 'r') as file:
-        file.readline() #ignoring first line
-        n_vertices = int(file.readline())
+        lines = file.readlines()
+        n_vertices = int(lines[1].strip())
+
         graph = [list() for _ in range(n_vertices + 1)]
-        def append_line(line):
-            vertex_u = int(line[0])
-            vertex_v = int(line[1])
-            color = int(line[2])
+
+        edge_list = []
+        deggre_counter = {}
+
+        for line in lines[4:]:
+            vertex_u, vertex_v, color = list(map(lambda x: int(x.strip().replace(' ', '')), line.strip().split('  ')))
             graph[vertex_u] += [vertex_v]
             graph[vertex_v] += [vertex_u]
-            return Edge(vertex_u, vertex_v, color)
 
-        file.readline() #ignoring next two lines
-        file.readline()
-        edge_list = list(map(append_line, [line.split() for line in file]))
-        
-        #print(greedy_initial_solution(edge_list))
-        
-        #solution = simulated_annealing(set(), edge_list, 1000, 0.001, 0.95)
-        #print(f"Solução: {len(solution)}")
-        #test_solution(solution)
+            if(vertex_u in deggre_counter):
+                deggre_counter[vertex_u] += 1
+            else:
+                deggre_counter[vertex_u] = 1
+
+            if(vertex_v in deggre_counter):
+                deggre_counter[vertex_v] += 1
+            else:
+                deggre_counter[vertex_v] = 1
+
+            edge_list.append(Edge(vertex_u, vertex_v, color))
+
+        print(greedy_initial_solution(edge_list, deggre_counter))
+        solution = simulated_annealing(set(), edge_list, 1000, 0.001, 0.95)
+        print(f"Solução: {len(solution)}")
+        test_solution(solution)
 
 if __name__ == "__main__":
     parse = argparse.ArgumentParser(prog='Python code to solve the instances of the diversified matching problem.')
