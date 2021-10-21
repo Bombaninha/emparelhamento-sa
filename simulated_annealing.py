@@ -347,8 +347,9 @@ def main(parser: argparse.ArgumentParser) -> None:
 
             edge_list.append(Edge(vertex_u, vertex_v, color))
 
-        print(greedy_initial_solution(edge_list, deggre_counter))
-        solution = simulated_annealing(set(), edge_list, 1000, 0.001, 0.95)
+        initial_sol = greedy_initial_solution(edge_list, deggre_counter)
+        print(initial_sol)
+        solution = simulated_annealing(initial_sol, edge_list, 1000, 0.001, 0.95)
         print(f"Solução: {len(solution)}")
         test_solution(solution)
 
