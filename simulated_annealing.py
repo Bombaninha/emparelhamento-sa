@@ -6,8 +6,6 @@ import random as rd
 from typing import List, Set, Union, Dict
 import os
 
-MAX_NEIGHBOR_ITER = 3000
-
 class Edge:
     def __init__(self, vertex_u: int, vertex_v: int, color: int) -> None:
         self.vertex_u = vertex_u
@@ -27,7 +25,7 @@ class Edge:
 
 def get_neighbor(sol: Set[Edge], edge_list: List[Edge]) -> Set[Edge]:
     n_edges = len(edge_list)
-    for _ in range(MAX_NEIGHBOR_ITER):
+    for _ in range(n_edges):
         edge = edge_list[rd.randint(0, n_edges - 1)]
         if edge in sol:
             sol.remove(edge)
@@ -55,15 +53,15 @@ def metropolis(sol: Set[Edge], temp: float, it: int, best: Set[Edge],
 
     return sol, best
 
-def simulated_annealing(sol: Set[Edge], edge_list: List[Edge],
-                        init_temp: float, end_temp: float, decrease: float) -> Set[Edge]:
+def simulated_annealing(sol: Set[Edge], edge_list: List[Edge], metropolis_it: int,
+                        init_temp: float, end_temp: float, discount: float) -> Set[Edge]:
     best = sol.copy()
     temp = init_temp
     while end_temp < temp:
-        sol, best = metropolis(sol, temp, 100, best, edge_list)
+        sol, best = metropolis(sol, temp, metropolis_it, best, edge_list)
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"{temp = } ---- current solution: {len(sol)} ---- best solution found: {len(best)}")
-        temp *= decrease
+        temp *= discount
 
     return best
 
@@ -79,7 +77,7 @@ def greedy_initial_solution(edges: List[Edge], deggre_counter: Dict[int, int]) -
     # Para cada aresta, calcula o grau médio e coloca na aresta
     for edge in edges:
         edge.deggre = (deggre_counter[edge.vertex_u] + deggre_counter[edge.vertex_v]) / 2
-    
+
     # Ordena as arestas, para buscar de maneira gulosa
     sorted_edges = sorted(edges, key=lambda x: x.deggre, reverse=False)
 
@@ -89,19 +87,19 @@ def greedy_initial_solution(edges: List[Edge], deggre_counter: Dict[int, int]) -
     for edge in sorted_edges:
         if not any(edge.has_same_attribute(e) for e in edges):
             edges.add(edge)
-            
+
 
     return edges
 
 def main(parser: argparse.ArgumentParser) -> None:
-    options = parser.parse_args()
-    if not options.filepath:
+    opt = parser.parse_args()
+    if not opt.filepath:
         print('Wrong usage of script!')
         print()
         parser.print_help()
         sys.exit()
 
-    with open(options.filepath, 'r') as file:
+    with open(opt.filepath, 'r') as file:
         lines = file.readlines()
         n_vertices = int(lines[1].strip())
 
@@ -111,7 +109,7 @@ def main(parser: argparse.ArgumentParser) -> None:
         deggre_counter = {}
 
         for line in lines[4:]:
-            vertex_u, vertex_v, color = list(map(lambda x: int(x.strip().replace(' ', '')), line.strip().split('  ')))
+            vertex_u, vertex_v, color = list(map(int, line.split()))
             graph[vertex_u] += [vertex_v]
             graph[vertex_v] += [vertex_u]
 
@@ -120,23 +118,40 @@ def main(parser: argparse.ArgumentParser) -> None:
             else:
                 deggre_counter[vertex_u] = 1
 
-            if(vertex_v in deggre_counter):
+            if vertex_v in deggre_counter:
                 deggre_counter[vertex_v] += 1
             else:
                 deggre_counter[vertex_v] = 1
 
             edge_list.append(Edge(vertex_u, vertex_v, color))
 
-        initial_sol = greedy_initial_solution(edge_list, deggre_counter)
-        print(initial_sol)
-        solution = simulated_annealing(initial_sol, edge_list, 1000, 0.001, 0.95)
-        print(f"Solução: {len(solution)}")
+        solution = greedy_initial_solution(edge_list, deggre_counter)
+
+        if opt.print:
+            print(solution)
+
+        solution = simulated_annealing(solution, edge_list, opt.metropolis_it, 
+                                       opt.init_temp, opt.end_temp, opt.discount)
+        print(f"Solution: {len(solution)}")
         test_solution(solution)
+
+        if opt.print:
+            print(solution)
 
 if __name__ == "__main__":
     parse = argparse.ArgumentParser(prog='Python code to solve the instances of the diversified matching problem.')
 
     parse.add_argument("-f", "--file-path", action="store", dest="filepath",
                        help="Define the path to the instance file (mandatory)")
+    parse.add_argument("-t", "--initial-temperature", action="store", dest="init_temp",
+                        type=int, default=1000, help="Initial temperature (default = 1000)")
+    parse.add_argument("-e", "--end-temperature", action="store", dest="end_temp",
+                        type=float, default=0.001, help="Ending temperature (default = 0.001)")
+    parse.add_argument("-d", "--discount", action="store", dest="discount",
+                        type=float, default=0.95, help="Discount value for temperature (default = 0.95)")
+    parse.add_argument("-i", "--metropolis-iterations", action="store", dest="metropolis_it",
+                        type=int, default=100, help="Number of metropolist iterations (default = 100)")
+    parse.add_argument("-p", "--print-solution", action="store_true", dest="print", default=False,
+                       help="Flag to indicate if the solution (edges set) should be printed")
 
     main(parse)
