@@ -236,7 +236,8 @@ class Edge:
         self.deggre = 0
 
     def has_same_attribute(self, edge: Edge) -> bool:
-        return edge.color == self.color or (edge.vertex_u == self.vertex_u or edge.vertex_u == self.vertex_v or edge.vertex_v == self.vertex_v or edge.vertex_v == self.vertex_u)
+        vertices = [self.vertex_u, self.vertex_v]
+        return edge.color == self.color or edge.vertex_u in vertices or edge.vertex_v in vertices
 
     def __repr__(self) -> str:
         return f"({self.vertex_u},{self.vertex_v})[{self.color}][Gm(e) = {self.deggre}]"
