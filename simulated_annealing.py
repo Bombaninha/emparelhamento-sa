@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse
 import sys
 import math
+from datetime import datetime
 import random as rd
 from typing import List, Set, Union, Dict
 import os
@@ -26,7 +27,7 @@ class Edge:
 def get_neighbor(sol: Set[Edge], edge_list: List[Edge]) -> Set[Edge]:
     n_edges = len(edge_list)
     for _ in range(n_edges):
-        edge = edge_list[rd.randint(0, n_edges - 1)]
+        edge = rd.choice(edge_list)
         if edge in sol:
             sol.remove(edge)
             break
@@ -54,13 +55,14 @@ def metropolis(sol: Set[Edge], temp: float, it: int, best: Set[Edge],
     return sol, best
 
 def simulated_annealing(sol: Set[Edge], edge_list: List[Edge], metropolis_it: int,
-                        init_temp: float, end_temp: float, discount: float) -> Set[Edge]:
+                        init_temp: float, end_temp: float, discount: float, echo: bool = False) -> Set[Edge]:
     best = sol.copy()
     temp = init_temp
     while end_temp < temp:
         sol, best = metropolis(sol, temp, metropolis_it, best, edge_list)
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print(f"{temp = } ---- current solution: {len(sol)} ---- best solution found: {len(best)}")
+        if echo:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"{temp = } ---- current solution: {len(sol)} ---- best solution found: {len(best)}")
         temp *= discount
 
     return best
@@ -99,6 +101,8 @@ def main(parser: argparse.ArgumentParser) -> None:
         parser.print_help()
         sys.exit()
 
+    print(f"Solving problem for instance {opt.filepath}.")
+
     with open(opt.filepath, 'r') as file:
         lines = file.readlines()
         n_vertices = int(lines[1].strip())
@@ -125,14 +129,18 @@ def main(parser: argparse.ArgumentParser) -> None:
 
             edge_list.append(Edge(vertex_u, vertex_v, color))
 
-        solution = greedy_initial_solution(edge_list, deggre_counter)
+        if opt.not_greedy:
+            solution = set()
+        else:
+            solution = greedy_initial_solution(edge_list, deggre_counter)
 
         if opt.print:
             print(solution)
 
-        solution = simulated_annealing(solution, edge_list, opt.metropolis_it, 
-                                       opt.init_temp, opt.end_temp, opt.discount)
+        solution = simulated_annealing(solution, edge_list, opt.metropolis_it,
+                                       opt.init_temp, opt.end_temp, opt.discount, opt.echo)
         print(f"Solution: {len(solution)}")
+        print()
         test_solution(solution)
 
         if opt.print:
@@ -153,5 +161,10 @@ if __name__ == "__main__":
                         type=int, default=100, help="Number of metropolist iterations (default = 100)")
     parse.add_argument("-p", "--print-solution", action="store_true", dest="print", default=False,
                        help="Flag to indicate if the solution (edges set) should be printed")
+    parse.add_argument("--echo-steps", action="store_true", dest="echo", default=False,
+                       help="Flag to indicate if the solution steps should be printed")
+    parse.add_argument("--wo-greedy", action="store_true", dest="not_greedy", default=False,
+                       help="Flag to indicate if the initial solution is not the greedy one")
 
+    rd.seed(datetime.now())
     main(parse)
