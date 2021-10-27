@@ -44,9 +44,13 @@ def get_neighbor(sol: Set[Edge], edge_list: List[Edge]) -> Set[Edge]:
 def metropolis(sol: Set[Edge], temp: float, it: int, best: Set[Edge],
                edge_list: List[Edge]) -> Union[Set[Edge], Set[Edge]]:
     for _ in range(it):
-        new_sol: Set[Edge] = get_neighbor(sol, edge_list)
+        new_sol: Set[Edge] = get_neighbor(sol.copy(), edge_list)
         delta = len(sol) - len(new_sol) # since we want to maximize, invert difference calculation
-        if rd.random() < min(math.exp(- delta / temp), 1.0):
+        try:
+            prob = math.exp(- delta / temp)
+        except OverflowError:
+            prob = float('inf')
+        if rd.random() < min(prob, 1.0):
             sol = new_sol
 
         if len(best) < len(sol):
