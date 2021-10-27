@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parse.add_argument("-f", "--file-path", action="store", dest="filepath",
                        help="Define the path to the instance file (mandatory)")
     parse.add_argument("-t", "--initial-temperature", action="store", dest="init_temp",
-                        type=int, default=1000, help="Initial temperature (default = 1000)")
+                        type=float, default=1000, help="Initial temperature (default = 1000)")
     parse.add_argument("-e", "--end-temperature", action="store", dest="end_temp",
                         type=float, default=0.001, help="Ending temperature (default = 0.001)")
     parse.add_argument("-d", "--discount", action="store", dest="discount",
