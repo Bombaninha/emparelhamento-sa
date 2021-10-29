@@ -24,6 +24,8 @@ class Edge:
     def __str__(self) -> str:
         return f"Edge({self.vertex_u},{self.vertex_v})[{self.color}]"
 
+    def __eq__(self, second_edge: Edge) -> bool:
+        return vertex_u =
 def get_neighbor(sol: Set[Edge], edge_list: List[Edge]) -> Set[Edge]:
     n_edges = len(edge_list)
     for _ in range(n_edges):
@@ -84,16 +86,15 @@ def greedy_initial_solution(edges: List[Edge], deggre_counter: Dict[int, int]) -
     for edge in edges:
         edge.deggre = (deggre_counter[edge.vertex_u] + deggre_counter[edge.vertex_v]) / 2
 
-    # Ordena as arestas, para buscar de maneira gulosa
+    # Ordena as arestas, para buscar de maneira gulosa, pelo menor grau
     sorted_edges = sorted(edges, key=lambda x: x.deggre, reverse=False)
 
     edges = set()
     edges.add(sorted_edges.pop(0))
 
-    for edge in sorted_edges:
+    for edge in set(sorted_edges):
         if not any(edge.has_same_attribute(e) for e in edges):
             edges.add(edge)
-
 
     return edges
 
