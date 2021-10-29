@@ -1,20 +1,43 @@
 from __future__ import annotations
 import argparse
 import sys
-import math
+from math import exp
 from datetime import datetime
-import random as rd
+from random import seed
 from typing import List, Set, Union, Dict
 import os
 
 class Edge:
     def __init__(self, vertex_u: int, vertex_v: int, color: int) -> None:
+        '''
+            Initializes an Edge object.
+
+            It takes two vertexes and one color. Furthermore, the degree of each edge is initialized to 0.
+        '''
         self.vertex_u = vertex_u
         self.vertex_v = vertex_v
         self.color = color
         self.deggre = 0
 
     def has_same_attribute(self, edge: Edge) -> bool:
+        '''
+            Compares two edges and sees if they share certain attributes.
+            Two edges share attributes if they both have the same color or at least one vertex in common.
+
+            Suppose the following instances:
+
+            e1: Edge of color 1 connecting vertices 1 and 4
+            e2: Edge of color 2 connecting vertices 1 and 5
+            e3: Edge of color 1 connecting vertices 2 and 8
+            e4: Edge of color 3 connecting vertices 2 and 4
+
+            Examples:
+
+            1) e1.has_same_attribute(e1) -> True, because they are the same edge
+            2) e1.has_same_attribute(e2) -> True, because they share the vertex 1
+            3) e1.has_same_attribute(e3) -> True, because they share the color 1
+            4) e1.has_same_attribute(e4) -> True, because they share the vertex 4
+        '''
         vertices = [self.vertex_u, self.vertex_v]
         return edge.color == self.color or edge.vertex_u in vertices or edge.vertex_v in vertices
 
@@ -24,8 +47,29 @@ class Edge:
     def __str__(self) -> str:
         return f"Edge({self.vertex_u},{self.vertex_v})[{self.color}]"
 
-    def __eq__(self, second_edge: Edge) -> bool:
-        return vertex_u =
+'''
+    def __eq__(self, edge: Edge) -> bool:
+       
+            Compares two edges and sees if they are equal.
+            Two edges are equal if they both have the same color and two vertexes in common.
+
+            Suppose the following instances:
+
+            e1: Edge of color 1 connecting vertices 1 and 4
+            e2: Edge of color 2 connecting vertices 1 and 5
+            e3: Edge of color 1 connecting vertices 2 and 8
+            e4: Edge of color 1 connecting vertices 4 and 1
+
+            Examples:
+
+            1) e1 == e1 -> True, because they are the same edge
+            2) e1 == e2 -> False, because they are not the same edge
+            3) e1 == e3 -> False, because they are not the same edge
+            4) e1 == e4 -> True, because they are the same edge, in another order
+        
+        vertices = [self.vertex_u, self.vertex_v]
+        return edge.color == self.color and edge.vertex_u in vertices and edge.vertex_v in vertices
+'''
 def get_neighbor(sol: Set[Edge], edge_list: List[Edge]) -> Set[Edge]:
     n_edges = len(edge_list)
     for _ in range(n_edges):
@@ -49,7 +93,7 @@ def metropolis(sol: Set[Edge], temp: float, it: int, best: Set[Edge],
         new_sol: Set[Edge] = get_neighbor(sol.copy(), edge_list)
         delta = len(sol) - len(new_sol) # since we want to maximize, invert difference calculation
         try:
-            prob = math.exp(- delta / temp)
+            prob = exp(- delta / temp)
         except OverflowError:
             prob = float('inf')
         if rd.random() < min(prob, 1.0):
@@ -82,19 +126,33 @@ def test_solution(sol: Set[Edge]) -> None:
             print(f"{edge = } has at least on attribute in common with another edge.")
 
 def greedy_initial_solution(edges: List[Edge], deggre_counter: Dict[int, int]) -> Set[Edge]:
-    # Para cada aresta, calcula o grau médio e coloca na aresta
+    '''
+        Creates an initial solution to the diversified matching problem based on a greedy approach.
+
+        The function performs the following steps:
+
+        1) For each edge, it calculates the average degree of the vertices touching it and stores that value within the Edge structure.
+        2) Sorts the set of edges, in ascending order, based on previously accumulated degree.
+        3) Creates a set of edges for the solution, which is initialized with the first edge of the ordered set.
+        4) Iterates over the rest of the set and adds all edges that do not share attributes with any of the edges that already make up the solution.
+    '''
+
+    # For each edge, it calculates the average degree of the vertices touching it.
     for edge in edges:
         edge.deggre = (deggre_counter[edge.vertex_u] + deggre_counter[edge.vertex_v]) / 2
 
-    # Ordena as arestas, para buscar de maneira gulosa, pelo menor grau
+    # Order the edges, to greedily search for the edge with the lowest average degree
     sorted_edges = sorted(edges, key=lambda x: x.deggre, reverse=False)
 
+    # Initializes the set of edges by placing the first edge of the ordered list, it means that the edge of the smallest degree is the first element of the initial solution.
     edges = set()
-    edges.add(sorted_edges.pop(0))
+    if(len(sorted_edges) > 0):
+        edges.add(sorted_edges.pop(0))
 
-    for edge in set(sorted_edges):
-        if not any(edge.has_same_attribute(e) for e in edges):
-            edges.add(edge)
+        # sorted_edges e set(sorted_edges) dão valores diferentes, apesar de serem a mesma qtde de elementos. 2468 p/ 2430
+        for edge in set(sorted_edges):
+            if not any(edge.has_same_attribute(e) for e in edges):
+                edges.add(edge)
 
     return edges
 
@@ -142,8 +200,9 @@ def main(parser: argparse.ArgumentParser) -> None:
         if opt.print:
             print(solution)
 
-        solution = simulated_annealing(solution, edge_list, opt.metropolis_it,
-                                       opt.init_temp, opt.end_temp, opt.discount, opt.echo)
+        
+        #solution = simulated_annealing(solution, edge_list, opt.metropolis_it,
+        #                               opt.init_temp, opt.end_temp, opt.discount, opt.echo)
         print(f"Solution: {len(solution)}")
         print()
         test_solution(solution)
@@ -171,5 +230,6 @@ if __name__ == "__main__":
     parse.add_argument("--wo-greedy", action="store_true", dest="not_greedy", default=False,
                        help="Flag to indicate if the initial solution is not the greedy one")
 
-    rd.seed(datetime.now())
+    # BUG: Deprecated
+    seed(datetime.now())
     main(parse)
