@@ -3,7 +3,7 @@ import argparse
 import sys
 from math import exp
 from datetime import datetime
-from random import seed
+from random import seed, random, choice
 from typing import List, Set, Union, Dict
 import os
 
@@ -73,7 +73,7 @@ class Edge:
 def get_neighbor(sol: Set[Edge], edge_list: List[Edge]) -> Set[Edge]:
     n_edges = len(edge_list)
     for _ in range(n_edges):
-        edge = rd.choice(edge_list)
+        edge = choice(edge_list)
         if edge in sol:
             sol.remove(edge)
             break
@@ -96,7 +96,7 @@ def metropolis(sol: Set[Edge], temp: float, it: int, best: Set[Edge],
             prob = exp(- delta / temp)
         except OverflowError:
             prob = float('inf')
-        if rd.random() < min(prob, 1.0):
+        if random() < min(prob, 1.0):
             sol = new_sol
 
         if len(best) < len(sol):
