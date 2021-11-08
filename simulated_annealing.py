@@ -355,13 +355,13 @@ if __name__ == "__main__":
     parse.add_argument("-f", "--file-path", action="store", dest="filepath",
                        help="Define the path to the instances file (mandatory) (can be a file or a directory of files)")
     parse.add_argument("-t", "--initial-temperature", action="store", dest="init_temp",
-                        type=float, default=1000, help="Initial temperature (default = 1000)")
+                        type=float, default=2, help="Initial temperature (default = 2)")
     parse.add_argument("-e", "--end-temperature", action="store", dest="end_temp",
-                        type=float, default=0.001, help="Ending temperature (default = 0.001)")
+                        type=float, default=0.01, help="Ending temperature (default = 0.01)")
     parse.add_argument("-d", "--discount", action="store", dest="discount",
-                        type=float, default=0.95, help="Discount value for temperature (default = 0.95)")
+                        type=float, default=0.9, help="Discount value for temperature (default = 0.9)")
     parse.add_argument("-i", "--metropolis-iterations", action="store", dest="metropolis_it",
-                        type=int, default=100, help="Number of metropolist iterations (default = 100)")
+                        type=int, default=500, help="Number of metropolist iterations (default = 500)")
     parse.add_argument("--debug", action="store_true", dest="debug", default=False,
                        help="Flag to indicate if debug information should be printed to screen.")
     parse.add_argument("--echo-steps", action="store_true", dest="echo", default=False,
