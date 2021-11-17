@@ -1,5 +1,5 @@
 *
-!results_cmp.csv
+!results_cmp_*.csv
 !SA_only.csv
 !.gitignore
 !*.png
